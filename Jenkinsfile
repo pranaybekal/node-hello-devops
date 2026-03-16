@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_HUB = "pranaykumpala"
         IMAGE_NAME = "node-hello-devops"
+        KUBECONFIG = "/var/snap/jenkins/5004/.kube/config"
     }
 
     stages {
@@ -38,22 +39,28 @@ pipeline {
         stage('nodejs_docker') {
             steps {
                 echo "Building Docker Image"
-                sh 'docker build -t $DOCKER_HUB/$IMAGE_NAME:latest .'
+                sh 'docker build -t ${DOCKER_HUB}/${IMAGE_NAME}:latest .'
             }
         }
 
         stage('docker_push') {
             steps {
                 echo "Pushing Docker Image"
-                sh 'docker push $DOCKER_HUB/$IMAGE_NAME:latest'
+                sh 'docker push ${DOCKER_HUB}/${IMAGE_NAME}:latest'
             }
         }
 
         stage('minikube_nodejs') {
             steps {
+                echo "Checking Kubernetes Cluster"
+                sh 'kubectl get nodes'
+
                 echo "Deploying to Minikube"
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
+                sh 'kubectl apply -f k8s/deployment.yaml --validate=false'
+                sh 'kubectl apply -f k8s/service.yaml --validate=false'
+
+                echo "Checking Pods"
+                sh 'kubectl get pods'
             }
         }
 
