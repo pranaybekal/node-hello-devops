@@ -67,9 +67,11 @@ pipeline {
                 echo "Checking Kubernetes Cluster"
                 sh 'kubectl get nodes'
 
-                echo "Deploying to Minikube"
-                sh 'kubectl apply -f k8s/deployment.yaml --validate=false'
-                sh 'kubectl apply -f k8s/service.yaml --validate=false'
+                echo "Removing old Kubernetes resources"
+                sh 'kubectl delete -f k8s/ --ignore-not-found'
+
+                echo "Deploying new Kubernetes resources"
+                sh 'kubectl apply -f k8s/'
 
                 echo "Checking Pods"
                 sh 'kubectl get pods'
