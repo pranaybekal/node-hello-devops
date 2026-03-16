@@ -43,6 +43,18 @@ pipeline {
             }
         }
 
+        stage('docker_run_local') {
+            steps {
+                echo "Running Docker Container on port 3001"
+
+                sh '''
+                docker rm -f nodejs-app || true
+                docker run -d -p 3001:3000 --name nodejs-app ${DOCKER_HUB}/${IMAGE_NAME}:latest
+                docker ps
+                '''
+            }
+        }
+
         stage('docker_push') {
             steps {
                 echo "Pushing Docker Image"

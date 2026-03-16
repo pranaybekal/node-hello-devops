@@ -1,20 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: node-hello-deployment
+  name: nodejs-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: node-hello
+      app: nodejs-app
   template:
     metadata:
       labels:
-        app: node-hello
+        app: nodejs-app
     spec:
       containers:
-      - name: node-hello
-        image: node-hello
-        imagePullPolicy: Never
+      - name: nodejs-container
+        image: pranaykumpala/node-hello-devops:latest
         ports:
         - containerPort: 3000
