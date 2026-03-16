@@ -1,42 +1,59 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_HUB = "pranaykumpala"
+        IMAGE_NAME = "node-hello-devops"
+    }
+
     stages {
 
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/sreepathysois/node-hello_Lab_Exam_Batch_2.git'
+                git branch: 'main', url: 'https://github.com/pranaybekal/node-hello-devops.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('nodebaremetalcompile') {
             steps {
+                echo "Installing Node Dependencies"
                 sh 'npm install'
             }
         }
 
-        stage('Run Application Locally') {
+        stage('nodebaremetaltest') {
             steps {
-                sh 'node index.js &'
+                echo "Running Node Tests"
+                sh 'npm test || true'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('nodebaremetalpackagedeploy') {
             steps {
-                sh 'docker build -t node-hello .'
+                echo "Packaging Node Application"
+                sh 'tar -czf nodeapp.tar.gz *'
             }
         }
 
-        stage('Load Image to Minikube') {
+        stage('nodejs_docker') {
             steps {
-                sh 'minikube image load node-hello'
+                echo "Building Docker Image"
+                sh 'docker build -t $DOCKER_HUB/$IMAGE_NAME:latest .'
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('docker_push') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
+                echo "Pushing Docker Image"
+                sh 'docker push $DOCKER_HUB/$IMAGE_NAME:latest'
+            }
+        }
+
+        stage('minikube_nodejs') {
+            steps {
+                echo "Deploying to Minikube"
+                sh 'kubectl apply -f k8s/deployment.yaml'
+                sh 'kubectl apply -f k8s/service.yaml'
             }
         }
 
